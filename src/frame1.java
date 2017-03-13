@@ -50,6 +50,7 @@ import java.awt.SystemColor;
 import javax.swing.JTextArea;
 import javax.swing.JSplitPane;
 import javax.swing.JSpinner;
+import javax.swing.SwingConstants;
 
 public class frame1 {
 
@@ -67,7 +68,6 @@ public class frame1 {
 	static Connection myconn;
 	private JTextField textField;
 	private JTextField textField_6;
-	private JTextField textField_7;
 	private JTextField textField_8;
 	private JTextField textField_9;
 	private JTextField textField_10;
@@ -75,6 +75,18 @@ public class frame1 {
 	private JTextField textField_11;
 
 	private Integer ID = 0;
+	private JTextField textField_5;
+	private JTextField textField_7;
+	private JTextField textField_12;
+	private JTextField textField_13;
+	private JTextField textField_14;
+	private JTextField textField_15;
+	private JTextField textField_16;
+	private JTextField textField_17;
+	private JTextField textField_18;
+	private JTextField textField_19;
+	private JTextField textField_20;
+	private JTextField textField_21;
 
 	/**
 	 * Launch the application.
@@ -261,6 +273,10 @@ public class frame1 {
 		ParentFrame.add(Homepage, "homepage");
 		Homepage.setLayout(new BorderLayout(0, 0));
 
+		JPanel HomeParentpanel = new JPanel();
+
+		CalendarPanel calendarPanel = new CalendarPanel(2, 2017);
+
 		JTabbedPane menuSelector = new JTabbedPane(JTabbedPane.TOP);
 		Homepage.add(menuSelector, BorderLayout.NORTH);
 
@@ -376,20 +392,148 @@ public class frame1 {
 		btnNewButton_3.setFont(new Font("Times New Roman", Font.PLAIN, 12));
 		ChangePwPanel.add(btnNewButton_3);
 
+		JPanel AppointParentMenu = new JPanel();
+		HomeParentpanel.add(AppointParentMenu);
+		AppointParentMenu.setLayout(new CardLayout(0, 0));
+		CardLayout AppointmentInfoLayout = (CardLayout) AppointParentMenu.getLayout();
+
 		JPanel appointmentMenu = new JPanel();
 		menuSelector.addTab("Appointment", null, appointmentMenu, null);
+		appointmentMenu.setLayout(new CardLayout(0, 0));
+		CardLayout appSubMenu = (CardLayout) appointmentMenu.getLayout();
+
+		JPanel AppMain = new JPanel();
+		appointmentMenu.add(AppMain, "main");
 
 		JButton btnNewAppointment = new JButton("New Appointment");
+		AppMain.add(btnNewAppointment);
+		btnNewAppointment.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				AppointmentInfoLayout.show(AppointParentMenu, "NewApp");
+			}
+		});
 		btnNewAppointment.setFont(new Font("Times New Roman", Font.PLAIN, 12));
-		appointmentMenu.add(btnNewAppointment);
 
-		JButton btnEditAppointment = new JButton("Cancel Appointment");
-		btnEditAppointment.setFont(new Font("Times New Roman", Font.PLAIN, 12));
-		appointmentMenu.add(btnEditAppointment);
+		JButton btnDelAppointment = new JButton("Cancel Appointment");
+		btnDelAppointment.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				appSubMenu.show(appointmentMenu, "Delete");
+			}
+		});
+		AppMain.add(btnDelAppointment);
+		btnDelAppointment.setFont(new Font("Times New Roman", Font.PLAIN, 12));
 
 		JButton btnNewButton = new JButton("Edit Appointment");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				appSubMenu.show(appointmentMenu, "AppEdit");
+			}
+		});
+		AppMain.add(btnNewButton);
 		btnNewButton.setFont(new Font("Times New Roman", Font.PLAIN, 12));
-		appointmentMenu.add(btnNewButton);
+
+		JPanel AppDlt = new JPanel();
+		appointmentMenu.add(AppDlt, "Delete");
+		AppDlt.setLayout(new GridLayout(0, 3, 0, 0));
+
+		JLabel lblAppointmentNumber = new JLabel("Appointment Number");
+		lblAppointmentNumber.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		AppDlt.add(lblAppointmentNumber);
+
+		textField_15 = new JTextField();
+		textField_15.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		AppDlt.add(textField_15);
+		textField_15.setColumns(4);
+
+		JButton btnCancel = new JButton("Cancel Appointment");
+		btnCancel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					String query = "SELECT * FROM appointment WHERE appID = ?";
+					PreparedStatement check = myconn.prepareStatement(query);
+					check.setString(1, textField_15.getText());
+					ResultSet appExist = check.executeQuery();
+					int count = 0;
+					while (appExist.next()) {
+						count++;
+					}
+					check.close();
+					appExist.close();
+					if (count > 0) {
+						String delete = "DELETE FROM appointment WHERE appID = ?";
+						PreparedStatement deleteData = myconn.prepareStatement(delete);
+						deleteData.setString(1, textField_15.getText());
+						deleteData.executeUpdate();
+						deleteData.close();
+						appSubMenu.show(appointmentMenu, "main");
+
+					} else {
+						textPane_2.setText("Error deleting the appointment");
+						textPane_2.setVisible(true);
+						menuSelector.setSelectedIndex(3); // help tab
+					}
+
+				} catch (Exception delerr) {
+					delerr.printStackTrace();
+				}
+			}
+		});
+		btnCancel.setHorizontalAlignment(SwingConstants.RIGHT);
+		btnCancel.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		AppDlt.add(btnCancel);
+		
+		JTextArea textArea_2 = new JTextArea();
+		
+		JPanel AppEdit = new JPanel();
+		appointmentMenu.add(AppEdit, "AppEdit");
+		AppEdit.setLayout(new GridLayout(1, 3, 0, 0));
+		
+		JLabel lblAppointmentNumber_1 = new JLabel("Appointment Number");
+		lblAppointmentNumber_1.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		AppEdit.add(lblAppointmentNumber_1);
+		
+		JButton btnEdit = new JButton("Edit");
+		btnEdit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				//get data from sql and assign it into the fields in the edit tab.
+				try{
+				String ps = "SELECT appdate, apptime, apptitle, appdescription FROM appointment WHERE appID = ?";
+				PreparedStatement appointment = myconn.prepareStatement(ps);
+				appointment.setString(1, textField_21.getText());
+				ResultSet appInfo = appointment.executeQuery();
+				
+				String selection;
+				String [] dateFields;
+				while(appInfo.next()){ //setting sql data into editor fields
+					selection = appInfo.getString("appdate");
+					dateFields = selection.split("-");
+					textField_18.setText(dateFields[0]);
+					textField_17.setText(dateFields[1]);
+					textField_16.setText(dateFields[2]);
+					selection = appInfo.getString("apptime");
+					textField_20.setText(selection);
+					selection = appInfo.getString("apptitle");
+					textField_19.setText(selection);
+					selection = appInfo.getString("appdescription");
+					textArea_2.setText(selection);
+				}
+				appointment.close();
+				appInfo.close();
+				
+				AppointmentInfoLayout.show(AppointParentMenu, "Edit");
+				}
+				catch(Exception appexe){
+					appexe.printStackTrace();
+				}
+			}
+		});
+		
+		textField_21 = new JTextField();
+		AppEdit.add(textField_21);
+		textField_21.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		textField_21.setColumns(10);
+		btnEdit.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		AppEdit.add(btnEdit);
 
 		JPanel settingsMenu = new JPanel();
 		menuSelector.addTab("Settings", null, settingsMenu, null);
@@ -424,20 +568,44 @@ public class frame1 {
 		lblEnterDate.setFont(new Font("Times New Roman", Font.PLAIN, 12));
 		ChangeRangePanel.add(lblEnterDate);
 
-		textField_7 = new JTextField();
-		textField_7.setFont(new Font("Times New Roman", Font.PLAIN, 12));
-		ChangeRangePanel.add(textField_7);
-		textField_7.setColumns(10);
+		JSpinner spinner = new JSpinner();
+		JSpinner spinner_1 = new JSpinner();
 
 		JButton btnSelect = new JButton("Select");
 		btnSelect.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// date range could be tricky, but ideally, they select a date
-				// then you update the calendar below to show a week starting
-				// with that date?
+				try {
+					HomeParentpanel.remove(HomeParentpanel.getComponent(1));
+					CalendarPanel calendarPanel = new CalendarPanel((int) spinner.getValue() - 1,
+							(int) spinner_1.getValue());
+					HomeParentpanel.add(calendarPanel);
+				} catch (Exception inErr) {
+					textPane_2.setText("Error: bad input");
+					textPane_2.setVisible(true);
+					menuSelector.setSelectedIndex(3);
+					inErr.printStackTrace();
+				}
 				SettingsMenuCardLayout.show(settingsMenu, "SettingsMain");
 			}
 		});
+
+		Calendar today = Calendar.getInstance();
+		int currentYear = today.get(Calendar.YEAR);
+
+		SpinnerModel modelY = new SpinnerNumberModel(currentYear, currentYear - 100, currentYear, 1);
+		SpinnerModel modelM = new SpinnerNumberModel(1, 1, 12, 1);
+
+		spinner.setModel(modelM);
+		spinner.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		ChangeRangePanel.add(spinner);
+
+		JLabel lblEnterYear = new JLabel("Enter Year");
+		lblEnterYear.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		ChangeRangePanel.add(lblEnterYear);
+
+		spinner_1.setModel(modelY);
+		spinner_1.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		ChangeRangePanel.add(spinner_1);
 		btnSelect.setFont(new Font("Times New Roman", Font.PLAIN, 12));
 		ChangeRangePanel.add(btnSelect);
 
@@ -478,8 +646,16 @@ public class frame1 {
 		JButton btnEnter = new JButton("Enter");
 		btnEnter.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// change the color of the panels showing an appointment
-				// using rgb values from the 3 text fields
+				try {
+					HomeParentpanel.getComponent(1).setBackground(new Color(Integer.parseInt(textField_8.getText()),
+							Integer.parseInt(textField_9.getText()), Integer.parseInt(textField_10.getText())));
+					calendarPanel.repaint();
+				} catch (Exception inErr) {
+					textPane_2.setText("Error: bad input");
+					textPane_2.setVisible(true);
+					menuSelector.setSelectedIndex(3);
+					inErr.printStackTrace();
+				}
 				SettingsMenuCardLayout.show(settingsMenu, "SettingsMain");
 			}
 		});
@@ -494,22 +670,15 @@ public class frame1 {
 		textPane_2.setEditable(false);
 		helpMenu.add(textPane_2);
 
-		JPanel HomeParentpanel = new JPanel();
 		Homepage.add(HomeParentpanel, BorderLayout.CENTER);
 		HomeParentpanel.setLayout(new GridLayout(0, 2, 0, 0));
 
-		CalendarPanel calendarPanel = new CalendarPanel(2, 2017);
-		HomeParentpanel.add(calendarPanel);
-
-		JPanel panel_1 = new JPanel();
-		HomeParentpanel.add(panel_1);
-		panel_1.setLayout(new BorderLayout(0, 0));
-
-		JTextPane txtpnLdkfjadslfajsdkfad = new JTextPane();
-		panel_1.add(txtpnLdkfjadslfajsdkfad, BorderLayout.CENTER);
+		JPanel Details = new JPanel();
+		AppointParentMenu.add(Details, "Details");
+		Details.setLayout(new BorderLayout(0, 0));
 
 		JPanel panel = new JPanel();
-		panel_1.add(panel, BorderLayout.NORTH);
+		Details.add(panel, BorderLayout.NORTH);
 
 		JLabel lblSelectDayFor = new JLabel("Select Day for details");
 		lblSelectDayFor.setFont(new Font("Times New Roman", Font.PLAIN, 12));
@@ -520,9 +689,236 @@ public class frame1 {
 		panel.add(textField_11);
 		textField_11.setColumns(2);
 
+		JTextArea textArea = new JTextArea();
+
 		JButton btnEnter_1 = new JButton("Update");
+		btnEnter_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					String check = "SELECT appID, apptitle, apptime, appdescription FROM useraccount NATURAL JOIN appointment WHERE userID = ? and appdate = ?";
+					PreparedStatement chk = myconn.prepareStatement(check);
+					String date = ((CalendarPanel) HomeParentpanel.getComponent(1)).getYear() + "-"
+							+ textField_11.getText() + "-"
+							+ (((CalendarPanel) HomeParentpanel.getComponent(1)).getMonth() + 1);
+					chk.setInt(1, ID);
+
+					// year day month
+					chk.setString(2, date);
+					ResultSet result = chk.executeQuery();
+					int count = 0;
+					while (result.next()) {
+						count++;
+					}
+					if (count > 0) {
+						result.beforeFirst();
+
+						String values;
+						while (result.next()) {
+							values = result.getString("apptitle");
+							textArea.append("Appointment: " + values);
+							values = result.getString("apptime");
+							textArea.append("\nAt: " + values + " oclock");
+							values = result.getString("appdescription");
+							textArea.append("\nNotes: " + values);
+							values = result.getString("appID");
+							textArea.append("\nID Number = " + values);
+							textArea.append("\n\n");
+						}
+					} else if (Integer.parseInt(textField_11.getText()) > 0
+							&& Integer.parseInt(textField_11.getText()) < 31) {
+						textArea.append("There are no appointments \nfor the date \n" + date);
+					} else {
+						textPane_2.setText("Error: bad input");
+						textPane_2.setVisible(true);
+						menuSelector.setSelectedIndex(3);
+					}
+
+					chk.close();
+					result.close();
+
+				} catch (Exception death) {
+					death.printStackTrace();
+				}
+
+			}
+		});
 		btnEnter_1.setFont(new Font("Times New Roman", Font.PLAIN, 12));
 		panel.add(btnEnter_1);
+
+		Details.add(textArea, BorderLayout.CENTER);
+		
+		//Edit Appointment Card
+		JPanel EditAppointmentCard = new JPanel();
+		AppointParentMenu.add(EditAppointmentCard, "Edit");
+		
+		JLabel lblNewLabel_16 = new JLabel("Day");
+		lblNewLabel_16.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		EditAppointmentCard.add(lblNewLabel_16);
+		
+		textField_16 = new JTextField();
+		textField_16.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		EditAppointmentCard.add(textField_16);
+		textField_16.setColumns(2);
+		
+		JLabel lblNewLabel_17 = new JLabel("Month");
+		lblNewLabel_17.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		EditAppointmentCard.add(lblNewLabel_17);
+		
+		textField_17 = new JTextField();
+		textField_17.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		EditAppointmentCard.add(textField_17);
+		textField_17.setColumns(2);
+		
+		JLabel lblNewLabel_18 = new JLabel("Year");
+		lblNewLabel_18.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		EditAppointmentCard.add(lblNewLabel_18);
+		
+		textField_18 = new JTextField();
+		textField_18.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		EditAppointmentCard.add(textField_18);
+		textField_18.setColumns(4);
+		
+		JLabel lblNewLabel_19 = new JLabel("Title");
+		lblNewLabel_19.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		EditAppointmentCard.add(lblNewLabel_19);
+		
+		textField_19 = new JTextField();
+		textField_19.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		EditAppointmentCard.add(textField_19);
+		textField_19.setColumns(10);
+		
+		JLabel lblNewLabel_20 = new JLabel("Time");
+		lblNewLabel_20.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		EditAppointmentCard.add(lblNewLabel_20);
+
+		textField_20 = new JTextField();
+		textField_20.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		EditAppointmentCard.add(textField_20);
+		textField_20.setColumns(4);
+		
+		JLabel lblDescription = new JLabel("Description");
+		lblDescription.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		EditAppointmentCard.add(lblDescription);
+		
+		textArea_2.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		textArea_2.setColumns(20);
+		textArea_2.setRows(4);
+		EditAppointmentCard.add(textArea_2);
+		
+		JButton btnUpdate = new JButton("Update");
+		btnUpdate.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					String update = "UPDATE appointment SET appdate = ?, apptime = ?, apptitle = ?, appdescription = ? WHERE appID = ?;";
+					PreparedStatement newApp = myconn.prepareStatement(update);
+					newApp.setString(1, textField_18.getText() + "-" + textField_17.getText() + "-" + textField_16.getText());
+					newApp.setString(2, textField_20.getText());
+					newApp.setString(3, textField_19.getText());
+					newApp.setString(4, textArea_2.getText());
+					newApp.setString(5, textField_21.getText());
+										
+					newApp.executeUpdate();
+					
+					AppointmentInfoLayout.show(AppointParentMenu, "Details");
+					
+				} catch (Exception newAppErr) {
+					newAppErr.printStackTrace();
+				}
+
+			
+				AppointmentInfoLayout.show(AppointParentMenu, "Details");
+			}
+		});
+		
+		btnUpdate.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		EditAppointmentCard.add(btnUpdate);
+		
+		//New Appointment Card
+		JPanel NewAppointmentCard = new JPanel();
+		AppointParentMenu.add(NewAppointmentCard, "NewApp");
+		NewAppointmentCard.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+
+		JLabel lblNewLabel_10 = new JLabel("Day");
+		lblNewLabel_10.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		NewAppointmentCard.add(lblNewLabel_10);
+
+		textField_5 = new JTextField();
+		textField_5.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		NewAppointmentCard.add(textField_5);
+		textField_5.setColumns(2);
+
+		JLabel lblNewLabel_11 = new JLabel("Month");
+		lblNewLabel_11.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		NewAppointmentCard.add(lblNewLabel_11);
+
+		textField_7 = new JTextField();
+		textField_7.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		NewAppointmentCard.add(textField_7);
+		textField_7.setColumns(2);
+
+		JLabel lblNewLabel_12 = new JLabel("Year");
+		lblNewLabel_12.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		NewAppointmentCard.add(lblNewLabel_12);
+
+		textField_12 = new JTextField();
+		textField_12.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		NewAppointmentCard.add(textField_12);
+		textField_12.setColumns(4);
+
+		JLabel lblNewLabel_13 = new JLabel("Title");
+		lblNewLabel_13.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		NewAppointmentCard.add(lblNewLabel_13);
+
+		textField_13 = new JTextField();
+		textField_13.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		NewAppointmentCard.add(textField_13);
+		textField_13.setColumns(10);
+
+		JLabel lblNewLabel_14 = new JLabel("Time");
+		lblNewLabel_14.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		NewAppointmentCard.add(lblNewLabel_14);
+
+		textField_14 = new JTextField();
+		textField_14.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		NewAppointmentCard.add(textField_14);
+		textField_14.setColumns(5);
+
+		JLabel lblNewLabel_15 = new JLabel("Description");
+		lblNewLabel_15.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		NewAppointmentCard.add(lblNewLabel_15);
+
+		JTextArea textArea_1 = new JTextArea();
+		textArea_1.setColumns(15);
+		textArea_1.setRows(4);
+		NewAppointmentCard.add(textArea_1);
+
+		JButton btnNewButton_2 = new JButton("Create Appointment");
+		btnNewButton_2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					String update = "INSERT INTO appointment(userID, appdate, apptime, apptitle, appdescription) VALUES(?, ?, ?, ?, ?)";
+					PreparedStatement newApp = myconn.prepareStatement(update);
+					newApp.setString(1, ID.toString());
+					newApp.setString(2,
+							textField_12.getText() + "-" + textField_7.getText() + "-" + textField_5.getText());
+					newApp.setString(3, textField_14.getText());
+					newApp.setString(4, textField_13.getText());
+					newApp.setString(5, textArea_1.getText());
+										
+					newApp.executeUpdate();
+					
+					AppointmentInfoLayout.show(AppointParentMenu, "Details");
+					
+				} catch (Exception newAppErr) {
+					newAppErr.printStackTrace();
+				}
+
+			}
+		});
+		btnNewButton_2.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+		NewAppointmentCard.add(btnNewButton_2);
+
+		HomeParentpanel.add(calendarPanel);
 
 		// new account tab
 		JPanel NewAccount = new JPanel();

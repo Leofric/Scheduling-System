@@ -7,9 +7,12 @@ import java.util.Date;
 public class tester {
 
 	public static void main(String[] args) {
-		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-		Date date = new Date();
-		System.out.println(dateFormat.format(date));
+		String selection = "2000-12-30";
+		String dateFields[];
+		dateFields = selection.split("-");
+		for(int i = 0; i<3; i++){
+			System.out.println(dateFields[i]);
+		}
 		
 		
 		
