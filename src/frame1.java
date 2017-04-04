@@ -199,6 +199,7 @@ public class frame1 {
 							RID.close();
 							result.close();
 						} catch (Exception bad) {
+							System.out.println("HEY");
 							bad.printStackTrace();
 						}
 						cardLayout.show(ParentFrame, "homepage");
@@ -289,6 +290,7 @@ public class frame1 {
 		accountMenu.add(AccMain, "AccMain");
 
 		JTextPane textPane_2 = new JTextPane();
+		textPane_2.setBackground(SystemColor.window);
 		textPane_2.setForeground(Color.RED);
 
 		JButton btnChangeUsername = new JButton("Change Username");
@@ -471,6 +473,7 @@ public class frame1 {
 						textPane_2.setText("Error deleting the appointment");
 						textPane_2.setVisible(true);
 						menuSelector.setSelectedIndex(3); // help tab
+						appSubMenu.show(appointmentMenu, "main");
 					}
 
 				} catch (Exception delerr) {
@@ -515,11 +518,10 @@ public class frame1 {
 					selection = appInfo.getString("apptitle");
 					textField_19.setText(selection);
 					selection = appInfo.getString("appdescription");
-					textArea_2.setText(selection);
 				}
 				appointment.close();
 				appInfo.close();
-				
+				appSubMenu.show(appointmentMenu, "main");
 				AppointmentInfoLayout.show(AppointParentMenu, "Edit");
 				}
 				catch(Exception appexe){
@@ -664,8 +666,6 @@ public class frame1 {
 
 		JPanel helpMenu = new JPanel();
 		menuSelector.addTab("Help", null, helpMenu, null);
-
-		textPane_2.setEnabled(false);
 		textPane_2.setFont(new Font("Times New Roman", Font.PLAIN, 12));
 		textPane_2.setEditable(false);
 		helpMenu.add(textPane_2);
@@ -710,6 +710,7 @@ public class frame1 {
 						count++;
 					}
 					if (count > 0) {
+						textArea.setText(null);
 						result.beforeFirst();
 
 						String values;
@@ -726,6 +727,7 @@ public class frame1 {
 						}
 					} else if (Integer.parseInt(textField_11.getText()) > 0
 							&& Integer.parseInt(textField_11.getText()) < 31) {
+						textArea.setText(null);//EDIT HERE
 						textArea.append("There are no appointments \nfor the date \n" + date);
 					} else {
 						textPane_2.setText("Error: bad input");
@@ -899,8 +901,7 @@ public class frame1 {
 					String update = "INSERT INTO appointment(userID, appdate, apptime, apptitle, appdescription) VALUES(?, ?, ?, ?, ?)";
 					PreparedStatement newApp = myconn.prepareStatement(update);
 					newApp.setString(1, ID.toString());
-					newApp.setString(2,
-							textField_12.getText() + "-" + textField_7.getText() + "-" + textField_5.getText());
+					newApp.setString(2, textField_12.getText() + "-" + textField_7.getText() + "-" + textField_5.getText());
 					newApp.setString(3, textField_14.getText());
 					newApp.setString(4, textField_13.getText());
 					newApp.setString(5, textArea_1.getText());
